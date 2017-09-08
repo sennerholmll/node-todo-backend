@@ -1,0 +1,30 @@
+{
+  "name": "medlogger",
+  "version": "1.0.0",
+  "description": "Med log backend",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha tests/unit/*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mhallendal/medloggerr"
+  },
+  "author": "Mikael Hallendal <mikael.hallendal@cag.se>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cag-group/medlogger/issues"
+  },
+  "homepage": "https://github.com/cag-group/medlogger#readme",
+  "dependencies": {
+    "@google-cloud/datastore": "^1.1.0",
+    "body-parser": "^1.17.2",
+    "express": "^4.15.4",
+    "validate.js": "^0.11.1"
+  },
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "eslint": "^4.6.1",
+    "mocha": "^3.5.0"
+  }
+}
