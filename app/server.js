@@ -1,15 +1,14 @@
 const express = require('express')
+const bodyParser = require('body-parser')
 
 const base = require('./routes/base')
 const entries = require('./routes/entries')
 
-function create_server() {
+function create_server(db) {
   const app = express()
-  const db = {
-    find: function() {
-      return 'these are all entries'
-    }
-  }
+
+  // Install middleware
+  app.use(bodyParser.json())
 
   // Install application
   app.use('/', base.create_router())
