@@ -8,7 +8,7 @@ const entryConstraints = {
 }
 
 function validate_entry(obj) {
-  return validate(obj, entryConstraints, {format: 'flat'})
+  return validate(obj, entryConstraints)
 }
 
 function create_entry(obj) {

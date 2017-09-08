@@ -4,7 +4,8 @@
   "description": "Med log backend",
   "main": "index.js",
   "scripts": {
-    "test": "mocha tests/unit/*"
+    "test": "mocha tests/unit/*",
+    "autotest": "supervisor -q -n exit mocha database/test/*.js"
   },
   "repository": {
     "type": "git",
@@ -20,10 +21,12 @@
     "@google-cloud/datastore": "^1.1.0",
     "body-parser": "^1.17.2",
     "express": "^4.15.4",
+    "uuid": "^3.1.0",
     "validate.js": "^0.11.1"
   },
   "devDependencies": {
     "chai": "^4.1.2",
+    "chai-http": "^3.0.0",
     "eslint": "^4.6.1",
     "mocha": "^3.5.0"
   }

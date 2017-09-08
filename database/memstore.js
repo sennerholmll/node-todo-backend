@@ -1,18 +1,40 @@
+const uuid = require('uuid/v4')
 
 function createCollection(entity) {
-  const entries = []
+  const entries = new Map()
+
   const collection = {
     find: function(skip, limit) {
-      return 'all entries for ' + entity
+      return new Promise((resolve) => {
+        resolve(entries.values())
+      })
     },
     findOne: function(key) {
-      return `found ${key} among entity ${entity}`
+      return new Promise((resolve, reject) => {
+        entries.forEach((entry) => {
+          if(entry.key === key) {
+            resolve(entry)
+          }
+        })
+        reject('not found')
+      })
     },
-    save: function(key, obj) {
-      return `saved ${JSON.stringify(obj)} with key ${key}`
-    },
+    save: function(entry) {
+      return new Promise((resolve) => {
+        if (!entry.key) {
+          entry.key = uuid()
+        }
+
+        entries.set(entry.key, entry)
+
+        resolve(entry)
+       })
+   },
     delete: function(key) {
-      return `removed ${key} from entity ${entity}`
+      return new Promise((resolve) => {
+        entries.delete(key)
+        resolve()
+      })
     }
   }
 
