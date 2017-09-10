@@ -17,6 +17,12 @@ function allowErrorResponse(allowedErrors, promise) {
   })
 }
 
+
+function applicationErrorHandler(err, req, res, next) {
+  const status = err.errorCode || 500
+  res.status(status).send(JSON.stringify(err.message))
+}
+
 describe('Entries', () => {
   var store
   var app
@@ -25,6 +31,7 @@ describe('Entries', () => {
     store = memstore()
     app = express()
     app.use(entries.createRouter(store))
+    app.use(applicationErrorHandler)
   })
 
   it('get / for empty database should return an empty array', async function() {
@@ -46,9 +53,8 @@ describe('Entries', () => {
     expect(res.body).to.be.eql(Array.from(await store.collection('Entry').find()))
   })
 
- it('post / gives 422 on invalid entry', async function() {
+  it('post / gives 422 on invalid entry', async function() {
     const res = await allowErrorResponse([422], chai.request(app).post('/').send({ name: 'name' }))
-
     expect(res).to.have.status(422)
     expect(res.text).to.not.be.undefined
   })
