@@ -9,15 +9,15 @@ function applicationErrorHandler(err, req, res, next) {
   res.status(status).send(JSON.stringify(err.message))
 }
 
-function create_server(db) {
+function createServer(db) {
   const app = express()
 
   // Install middleware
   app.use(bodyParser.json())
 
   // Install application
-  app.use('/', base.create_router())
-  app.use('/entries', entries.create_router(db))
+  app.use('/', base.createRouter())
+  app.use('/entries', entries.createRouter(db))
 
   app.use(applicationErrorHandler)
 
@@ -25,5 +25,5 @@ function create_server(db) {
 }
 
 module.exports = {
-  create_server
+  createServer
 }

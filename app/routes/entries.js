@@ -1,7 +1,7 @@
 const express = require('express')
-const { create_entry } = require('../models/entry.js')
+const { createEntry } = require('../models/entry.js')
 
-function create_router(db) {
+function createRouter(db) {
   const router = express.Router()
 
   router.use(function(req, res, next) {
@@ -16,7 +16,7 @@ function create_router(db) {
   )
 
   router.post('/', (req, res) =>
-    Promise.resolve(create_entry(req.body))
+    Promise.resolve(createEntry(req.body))
       .then(entry => req.entries.save(entry))
       .then(entry => res.status(201).json(entry))
   )
@@ -25,5 +25,5 @@ function create_router(db) {
 }
 
 module.exports = {
-  create_router
+  createRouter
 }

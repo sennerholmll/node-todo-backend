@@ -24,7 +24,7 @@ describe('Entries', () => {
   beforeEach(() => {
     store = memstore()
     app = express()
-    app.use(entries.create_router(store))
+    app.use(entries.createRouter(store))
   })
 
   it('get / for empty database should return an empty array', async function() {

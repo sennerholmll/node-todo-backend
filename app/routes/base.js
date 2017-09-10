@@ -1,6 +1,6 @@
 const express = require('express')
 
-function create_router() {
+function createRouter() {
   const router = new express.Router()
 
   router.route('/').get((req, res) => {
@@ -11,5 +11,5 @@ function create_router() {
 }
 
 module.exports = {
-  create_router
+  createRouter
 }

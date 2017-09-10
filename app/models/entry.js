@@ -12,7 +12,7 @@ const entryConstraints = {
  *
  * @param {Object} obj the proposed entry
  */
-function validate_entry(obj) {
+function validateEntry(obj) {
   return validate(obj, entryConstraints)
 }
 
@@ -21,8 +21,8 @@ function validate_entry(obj) {
  *
  * @param {Object} obj
  */
-const create_entry = (obj) => {
-  const validationResult = validate_entry(obj)
+const createEntry = (obj) => {
+  const validationResult = validateEntry(obj)
   if (validationResult) {
     throw { errorCode: 422, message: validationResult }
   }
@@ -35,6 +35,6 @@ const create_entry = (obj) => {
 }
 
 module.exports = {
-  create_entry,
-  validate_entry
+  createEntry,
+  validateEntry
 }
