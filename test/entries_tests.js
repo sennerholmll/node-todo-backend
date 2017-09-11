@@ -49,7 +49,8 @@ describe('Entries', () => {
 
     expect(res).to.be.json
     expect(res).to.have.status(200)
-    expect(res.body).to.be.eql(Array.from(await store.collection('Entry').find()))
+    const result = await store.collection('Entry').find()
+    expect(res.body).to.be.eql(Array.from(result.entities))
   })
 
   it('post / gives 422 on invalid entry', async () => {

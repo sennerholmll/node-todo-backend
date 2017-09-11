@@ -11,7 +11,7 @@ function createRouter(db) {
 
   router.get('/', (req, res, next) =>
     req.entries.find()
-      .then(entries => Array.from(entries))
+      .then(result => Array.from(result.entities))
       .then(entries => res.status(200).json(entries))
   )
 
