@@ -4,7 +4,7 @@ const { createEntry } = require('../models/entry.js')
 function createRouter(db) {
   const router = express.Router()
 
-  router.use(function(req, res, next) {
+  router.use((req, res, next) => {
     req.entries = db.collection('Entry')
     next()
   })

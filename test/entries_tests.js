@@ -17,7 +17,6 @@ function allowErrorResponse(allowedErrors, promise) {
   })
 }
 
-
 function applicationErrorHandler(err, req, res, next) {
   const status = err.errorCode || 500
   res.status(status).send(JSON.stringify(err.message))
@@ -34,7 +33,7 @@ describe('Entries', () => {
     app.use(applicationErrorHandler)
   })
 
-  it('get / for empty database should return an empty array', async function() {
+  it('get / for empty database should return an empty array', async () => {
     res = await chai.request(app).get('/')
 
     expect(res).to.be.json
@@ -42,7 +41,7 @@ describe('Entries', () => {
     expect(res.body).to.have.lengthOf(0)
   })
 
-  it('get / should list all entries in database', async function() {
+  it('get / should list all entries in database', async () => {
     await store.collection('Entry').save({ name: 'a name' })
     await store.collection('Entry').save({ name: 'another one' })
 
@@ -53,7 +52,7 @@ describe('Entries', () => {
     expect(res.body).to.be.eql(Array.from(await store.collection('Entry').find()))
   })
 
-  it('post / gives 422 on invalid entry', async function() {
+  it('post / gives 422 on invalid entry', async () => {
     const res = await allowErrorResponse([422], chai.request(app).post('/').send({ name: 'name' }))
     expect(res).to.have.status(422)
     expect(res.text).to.not.be.undefined
