@@ -13,14 +13,14 @@ function createRouter(db) {
     req.entries.find()
       .then(result => Array.from(result.entities))
       .then(entries => res.status(200).json(entries))
-      .catch(err => res.status(500).send('Internal server error'))
+      .catch(err => next(err))
   )
 
   router.post('/', (req, res) =>
     Promise.resolve(createEntry(req.body))
       .then(entry => req.entries.save(entry))
       .then(entry => res.status(201).json(entry))
-      .catch(err => res.status(500).send('Internal server error'))
+      .catch(err => next(error))
   )
 
   return router
