@@ -4,6 +4,7 @@
   "description": "Med log backend",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "test": "mocha tests/unit/*",
     "autotest": "supervisor -q -n exit mocha database/test/*.js"
   },

@@ -12,16 +12,15 @@ function getConfigFile() {
     return JSON.parse(fs.readFileSync(configFile, 'utf8'))
   }
 
-  return null
+  return {}
 }
 
-function isProduction(config) {
-  const envSet = process.env.NODE_ENV === 'production'
-  return (envSet && config !== null)
+function isProduction() {
+  return process.env.NODE_ENV === 'production'
 }
 
 const config = getConfigFile()
-const db = isProduction(config) ? datastore(config) : memstore()
+const db = isProduction() ? datastore(config) : memstore()
 
 const server = createServer(db)
 
