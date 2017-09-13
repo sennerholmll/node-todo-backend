@@ -6,7 +6,7 @@ const items = require('./routes/items')
 
 function applicationErrorHandler(err, req, res, next) {
   const status = err.errorCode || 500
-  res.status(status).send(JSON.stringify(err.message))
+  res.status(status).send(err.message)
 }
 
 function createServer(db) {

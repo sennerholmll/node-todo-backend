@@ -27,8 +27,9 @@ function validateTodoItem(obj) {
 const createTodoItem = (obj) => {
   const validationResult = validateTodoItem(obj)
   if (validationResult) {
-    console.log('YEP: This is it!')
-    throw { errorCode: 422, message: validationResult }
+    const error = new Error(JSON.stringify(validationResult))
+    error.errorCode = 422
+    throw error
   }
 
   return {
