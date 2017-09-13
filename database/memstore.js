@@ -4,7 +4,9 @@ function createCollection(entity) {
   const entries = new Map()
 
   const collection = {
-    find: (skip, limit) => Promise.resolve({ entities: entries.values(), hasMore: false }),
+    find: (skip, limit) => {
+      return Promise.resolve({ entities: Array.from(entries.values()), hasMore: false })
+    },
     findOne: (key) =>
       new Promise((resolve, reject) => {
         entries.forEach((entry) => {

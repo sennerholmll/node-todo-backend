@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "mocha tests/unit/*",
+    "test": "mocha test/* database/test/*",
     "autotest": "supervisor -q -n exit mocha database/test/*.js"
   },
   "repository": {
