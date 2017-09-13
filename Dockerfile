@@ -7,12 +7,14 @@ WORKDIR /server
 COPY package.json .
 COPY package-lock.json .
 
-RUN npm install
+RUN npm install --production
 
 # Copy source
 COPY index.js .
-COPY app/ /server/app/
-COPY database/ /server/database/
+COPY app/ ./app/
+COPY database/ ./database/
+COPY test/ ./test/
+COPY runtest .
 
 EXPOSE 3333
 
