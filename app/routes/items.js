@@ -1,25 +1,25 @@
 const express = require('express')
-const { createEntry } = require('../models/entry.js')
+const { createTodoItem } = require('../models/todoitem.js')
 
 function createRouter(db) {
   const router = express.Router()
 
   router.use((req, res, next) => {
-    req.entries = db.collection('Entry')
+    req.items = db.collection('TodoItem')
     next()
   })
 
   router.get('/', (req, res, next) =>
-    req.entries.find()
+    req.items.find()
       .then(result => Array.from(result.entities))
-      .then(entries => res.status(200).json(entries))
+      .then(items => res.status(200).json(items))
       .catch(err => next(err))
   )
 
-  router.post('/', (req, res) =>
-    Promise.resolve(createEntry(req.body))
-      .then(entry => req.entries.save(entry))
-      .then(entry => res.status(201).json(entry))
+  router.post('/', (req, res, next) =>
+    Promise.resolve(createTodoItem(req.body))
+      .then(item => req.items.save(item))
+      .then(item => res.status(201).json(item))
       .catch(err => next(error))
   )
 

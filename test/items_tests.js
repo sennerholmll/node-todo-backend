@@ -6,7 +6,7 @@ chai.use(chaiHttp)
 
 const express = require('express')
 const memstore = require('../database/memstore')
-const entries = require('../app/routes/entries')
+const entries = require('../app/routes/items')
 
 function allowErrorResponse(allowedErrors, promise) {
   return promise.catch(err => {
@@ -22,7 +22,7 @@ function applicationErrorHandler(err, req, res, next) {
   res.status(status).send(JSON.stringify(err.message))
 }
 
-describe('Entries', () => {
+describe('Items', () => {
   var store
   var app
 
@@ -41,16 +41,17 @@ describe('Entries', () => {
     expect(res.body).to.have.lengthOf(0)
   })
 
-  it('get / should list all entries in database', async () => {
-    await store.collection('Entry').save({ name: 'a name' })
-    await store.collection('Entry').save({ name: 'another one' })
+  it('get / should list all items in database', async () => {
+    const collection = store.collection('TodoItem')
+    await collection.save({ title: 'a name' })
+    await collection.save({ title: 'another one' })
 
     res = await chai.request(app).get('/')
 
     expect(res).to.be.json
     expect(res).to.have.status(200)
-    const result = await store.collection('Entry').find()
-    expect(res.body).to.be.eql(Array.from(result.entities))
+    const result = await collection.find()
+    expect(res.body).to.be.eql(result.entities)
   })
 
   it('post / gives 422 on invalid entry', async () => {

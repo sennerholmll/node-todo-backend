@@ -2,7 +2,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 
 const base = require('./routes/base')
-const entries = require('./routes/entries')
+const items = require('./routes/items')
 
 function applicationErrorHandler(err, req, res, next) {
   const status = err.errorCode || 500
@@ -17,7 +17,7 @@ function createServer(db) {
 
   // Install application
   app.use('/', base.createRouter())
-  app.use('/entries', entries.createRouter(db))
+  app.use('/items', items.createRouter(db))
 
   app.use(applicationErrorHandler)
 
