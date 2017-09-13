@@ -6,7 +6,8 @@ const path = require('path')
 const fs = require('fs')
 
 function getConfigFile() {
-  const configFile = path.join(__dirname, 'config.json')
+  const configFile = path.join(__dirname, 'config/datastore.json')
+  console.log(configFile)
 
   if (fs.existsSync(configFile)) {
     return JSON.parse(fs.readFileSync(configFile, 'utf8'))

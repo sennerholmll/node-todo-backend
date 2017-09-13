@@ -1,0 +1,5 @@
+{
+  "projectId": "GOOGLE PROJECT ID",
+  "keyFilename": "SERVICE ACCOUNT KEY PATH",
+  "namespace": "DATASTORE NAMESPACE"
+}
