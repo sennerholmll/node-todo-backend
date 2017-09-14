@@ -7,7 +7,8 @@ function isProduction() {
   return process.env.NODE_ENV === 'production'
 }
 
-const config = datastore.getConfig(path.join(__dirname, '..', 'config/datastore.json'), process.env)
+const config = datastore.getConfig(path.join(__dirname, '..', 'config/datastore.json'),
+                                   process.env)
 const db = isProduction() ? datastore.create(config) : memstore()
 
 const server = createServer(db)

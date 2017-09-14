@@ -24,7 +24,7 @@ function validateTodoItem(obj) {
  *
  * @param {Object} obj
  */
-const createTodoItem = (obj) => {
+function createTodoItem(obj) {
   const validationResult = validateTodoItem(obj)
   if (validationResult) {
     const error = new Error(JSON.stringify(validationResult))
