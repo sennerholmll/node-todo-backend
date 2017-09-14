@@ -5,7 +5,7 @@ const chaiHttp = require('chai-http')
 chai.use(chaiHttp)
 
 const express = require('express')
-const memstore = require('../database/memstore')
+const memstore = require('../app/database/memstore')
 const entries = require('../app/routes/items')
 
 function allowErrorResponse(allowedErrors, promise) {

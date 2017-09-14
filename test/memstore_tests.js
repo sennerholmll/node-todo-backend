@@ -1,6 +1,6 @@
 const expect = require('chai').expect
 
-const memstore = require('../memstore')
+const memstore = require('../app/database/memstore')
 
 describe('Memstore', () => {
   describe('Collection', () => {

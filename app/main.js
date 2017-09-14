@@ -1,4 +1,4 @@
-const {createServer} = require('./app/server')
+const {createServer} = require('./server')
 const datastore = require('./database/datastore')
 const memstore = require('./database/memstore')
 
