@@ -49,7 +49,24 @@ function createCollection(ds, entityName) {
         })
       })
     },
-    findOne: (key) => {},
+    findOne: (key) => {
+      return new Promise((resolve, reject) => {
+        const dsKey = ds.key([entityName, parseInt(key, 10)]);
+        ds.get(dsKey, (err, entity) => {
+          if (!err && !entity) {
+            err = {
+              errorCode: 404,
+              message: 'Not found'
+            }
+          }
+          if (err) {
+            reject(err)
+            return;
+          }
+          resolve(fromDatastore(entity))
+        });
+      })
+    },
     save: (entry) => {
       let key
       if (entry.key) {

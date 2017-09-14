@@ -21,9 +21,8 @@ module.exports = function shouldBehaveLikeAStore(entityName) {
   it('supports finding an entry', async function () {
     const collection = this.store.collection(entityName)
     const savedEntry = await collection.save({ name: "My name", data: "Some data of sorts" })
-    console.log(`savedEntry is ${JSON.stringify(savedEntry)}`)
     const entry = await collection.findOne(savedEntry.key)
-    expect(entry).to.be.equal(savedEntry)
+    expect(entry).to.be.eql(savedEntry)
   })
 
   it('supports deleting entries', async function () {
