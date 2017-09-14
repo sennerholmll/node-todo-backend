@@ -7,11 +7,10 @@ const path = require('path')
 const entityName = 'Entry'
 
 // System tests against a real Google Cloud Datastore
-describe('Datastore', () => {
+describe('Datastore behaves like a Store', () => {
   beforeEach(function() {
     const config = datastore.getConfig(path.join(__dirname, '..', '..', 'config/datastore.json'),
                                       { GOOGLE_DATASTORE_NAMESPACE: 'system-test-fast' })
-    console.log(`config: ${JSON.stringify(config)}`)
     this.store = datastore.create(config)
   })
 

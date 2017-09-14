@@ -3,7 +3,6 @@ const expect = require('chai').expect
 
 module.exports = function shouldBehaveLikeAStore(entityName) {
   it('supports find on empty collection', async function () {
-    console.log(`Running test case: ${this.store}`)
     const collection = this.store.collection(entityName)
     const entries = (await collection.find()).entities
     expect(entries).to.have.lengthOf(0)
