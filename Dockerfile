@@ -11,7 +11,6 @@ RUN npm install --production
 
 # Copy source
 COPY app/ ./app/
-COPY database/ ./database/
 COPY test/ ./test/
 COPY runtest .
 
