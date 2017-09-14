@@ -12,7 +12,8 @@ RUN npm install --production
 
 # Copy source
 COPY app ./app
-COPY test/ ./test
+COPY system-test ./system-test
+COPY test ./test
 COPY runtest .
 
 EXPOSE 3333
