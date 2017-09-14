@@ -1,8 +1,17 @@
 #!/usr/bin/env bash
 
 set -e
-set -x
+
+mode="--instant"
+if [ $# -eq 2 ]; then
+    mode=$1
+fi
 
 npm install
 
-npm run test
+# Instant
+if [ "${mode}" = "--instant" ]; then
+    npm run test
+elif [ "${mode}" = "--fast" ]; then
+    npm run system-test:fast
+fi
