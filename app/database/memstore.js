@@ -36,7 +36,7 @@ function createCollection(entity) {
   return collection
 }
 
-function createMemStore() {
+function create() {
   const collections = {}
 
   const memStore = {
@@ -52,4 +52,6 @@ function createMemStore() {
   return memStore
 }
 
-module.exports = createMemStore
+module.exports = {
+  create
+}

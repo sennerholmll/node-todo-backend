@@ -9,7 +9,7 @@ function isProduction() {
 
 const config = datastore.getConfig(path.join(__dirname, '..', 'config/datastore.json'),
                                    process.env)
-const db = isProduction() ? datastore.create(config) : memstore()
+const db = isProduction() ? datastore.create(config) : memstore.create()
 
 const server = createServer(db)
 

@@ -1,7 +1,7 @@
 const Datastore = require('@google-cloud/datastore');
 const fs = require('fs')
 
-function getDatastoreConfig(path, env) {
+function getConfig(path, env) {
   const config = fs.existsSync(path) ? JSON.parse(fs.readFileSync(path, 'utf8')) : {}
 
   if (env.GOOGLE_DATASTORE_NAMESPACE) {
@@ -10,7 +10,6 @@ function getDatastoreConfig(path, env) {
 
   return config
 }
-
 
 function fromDatastore (obj) {
   obj.key = obj[Datastore.KEY].id;
@@ -107,7 +106,7 @@ function createCollection(ds, entityName) {
   return collection
 }
 
-function createDataStore(config) {
+function create(config) {
   const ds = Datastore(config)
   const collections = {}
 
@@ -125,6 +124,6 @@ function createDataStore(config) {
 }
 
 module.exports = {
-  create: createDataStore,
-  getConfig: getDatastoreConfig
+  create,
+  getConfig
 }

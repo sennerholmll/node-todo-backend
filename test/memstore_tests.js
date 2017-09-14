@@ -5,8 +5,7 @@ const shouldBehaveLikeAStore = require('./test_utils/shared_store_tests')
 
 describe('Memstore', () => {
   beforeEach(function() {
-    this.store = memstore()
-    console.log(`Running beforeEach: ${this.store}`)
+    this.store = memstore.create()
   })
 
   shouldBehaveLikeAStore('Item')

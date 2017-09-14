@@ -27,7 +27,7 @@ describe('Items', () => {
   var app
 
   beforeEach(() => {
-    store = memstore()
+    store = memstore.create()
     app = express()
     app.use(entries.createRouter(store))
     app.use(applicationErrorHandler)
