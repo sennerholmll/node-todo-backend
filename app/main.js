@@ -5,22 +5,21 @@ const memstore = require('./database/memstore')
 const path = require('path')
 const fs = require('fs')
 
-function getConfigFile() {
-  const configFile = path.join(__dirname, 'config/datastore.json')
-  console.log(configFile)
+function getDatastoreConfig(path) {
+  const config = fs.existsSync(path) ? JSON.parse(fs.readFileSync(path, 'utf8')) : {}
 
-  if (fs.existsSync(configFile)) {
-    return JSON.parse(fs.readFileSync(configFile, 'utf8'))
+  if (process.env.GOOGLE_DATASTORE_NAMESPACE) {
+    config.namespace = process.env.GOOGLE_DATASTORE_NAMESPACE
   }
 
-  return {}
+  return config
 }
 
 function isProduction() {
   return process.env.NODE_ENV === 'production'
 }
 
-const config = getConfigFile()
+const config = getDatastoreConfig(path.join(__dirname, '..', 'config/datastore.json'))
 const db = isProduction() ? datastore(config) : memstore()
 
 const server = createServer(db)
