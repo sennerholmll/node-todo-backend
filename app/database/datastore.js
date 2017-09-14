@@ -1,4 +1,16 @@
 const Datastore = require('@google-cloud/datastore');
+const fs = require('fs')
+
+function getDatastoreConfig(path, env) {
+  const config = fs.existsSync(path) ? JSON.parse(fs.readFileSync(path, 'utf8')) : {}
+
+  if (env.GOOGLE_DATASTORE_NAMESPACE) {
+    config.namespace = env.GOOGLE_DATASTORE_NAMESPACE
+  }
+
+  return config
+}
+
 
 function fromDatastore (obj) {
   obj.key = obj[Datastore.KEY].id;
@@ -95,4 +107,7 @@ function createDataStore(config) {
   return dataStore
 }
 
-module.exports = createDataStore
+module.exports = {
+  create: createDataStore,
+  getConfig: getDatastoreConfig
+}
