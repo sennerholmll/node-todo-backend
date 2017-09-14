@@ -1,5 +1,7 @@
 FROM node:8.4.0
 
+USER node
+
 # Create app directory
 WORKDIR /server
 
