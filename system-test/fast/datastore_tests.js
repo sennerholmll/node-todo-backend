@@ -10,7 +10,7 @@ const entityName = 'Entry'
 describe('Datastore behaves like a Store', () => {
   beforeEach(function() {
     const config = datastore.getConfig(path.join(__dirname, '..', '..', 'config/datastore.json'),
-                                      { GOOGLE_DATASTORE_NAMESPACE: 'system-test-fast' })
+                                       process.env)
     this.store = datastore.create(config)
   })
 
