@@ -17,7 +17,6 @@ function allowErrorResponse(allowedErrors, promise) {
 }
 
 function applicationErrorHandler(err, req, res, next) {
-  console.log('ERROR: ' + err)
   const status = err.errorCode || 500
   res.status(status).send(JSON.stringify(err.message))
 }
