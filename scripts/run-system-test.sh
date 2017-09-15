@@ -19,7 +19,7 @@ gcloud docker -- pull ${full_imagename}
 
 # Instant
 if [ "${mode}" = "--fast" ]; then
-# Hardcoded parts to werk on a Go agent running in docker cloud
+# Hardcoded parts to work on a Go agent running in docker cloud
     docker_id=`docker ps | grep $HOSTNAME | grep -v POD | awk '{print $1}'`
     cred_dir=`dirname ${GOOGLE_APPLICATION_CREDENTIALS}`
     host_vol_dir=`docker inspect  $docker_id  | grep $cred_dir | grep /var/lib/kub | sed s/\"//g | awk -F: '{print $1}'`
