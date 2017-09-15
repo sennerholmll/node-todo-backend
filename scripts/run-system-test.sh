@@ -23,5 +23,5 @@ if [ "${mode}" = "--fast" ]; then
     docker_id=`docker ps | grep $HOSTNAME | grep -v POD | awk '{print $1}'`
     cred_dir=`dirname ${GOOGLE_APPLICATION_CREDENTIALS}`
     host_vol_dir=`docker inspect  $docker_id  | grep $cred_dir | grep /var/lib/kub | sed s/\"//g | awk -F: '{print $1}'`
-    docker run --rm -v ${host_vol_dir}:${cred_dir} -e GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS} ${full_imagename} ./runtest --fast
+    docker run --rm -v ${host_vol_dir}:${cred_dir} -e GOOGLE_DATASTORE_NAMESPACE="${imagename}${mode}${version}" -e GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS} ${full_imagename} ./runtest --fast
 fi
