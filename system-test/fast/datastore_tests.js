@@ -17,5 +17,11 @@ describe('Datastore behaves like a Store', () => {
   shouldBehaveLikeAStore(entityName)
 
   // Since tests are being run against the real datastore we need to manually remove all test entries after each test
-  
+  afterEach(async function() {
+    const collection = this.store.collection(entityName)
+    const result = await collection.find()
+    for (element of result.entities) {
+      await collection.delete(element.key)
+    }
+  })
 })
