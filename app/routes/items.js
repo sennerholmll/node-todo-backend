@@ -1,6 +1,23 @@
 const express = require('express')
 const { createTodoItem } = require('../models/todoitem.js')
 
+/**
+ * Fetches a request todo item from the incoming request. This should be validated
+ * against the todo item constraints by calling createTodoItem which will return an
+ * object that can be persisted.
+ *
+ * @param {*} req The HTTP request
+ * @param {*} requestItem The item as sent with the request
+ */
+function getRequestItem(request) {
+  const item = request.body
+
+  if (item && request.user) {
+    item.user = request.user.id || null
+  }
+  return item
+}
+
 function createRouter(db) {
   const router = express.Router()
 
@@ -13,14 +30,15 @@ function createRouter(db) {
     req.items.find()
       .then(result => Array.from(result.entities))
       .then(items => res.status(200).json(items))
-      .catch(err => next(err))
+      .catch(error => next(error))
   )
 
   router.post('/', (req, res, next) =>
-    Promise.resolve(createTodoItem(req.body))
+    Promise.resolve(getRequestItem(req))
+      .then(requestItem => createTodoItem(requestItem))
       .then(item => req.items.save(item))
       .then(item => res.status(201).json(item))
-      .catch(err => next(error))
+      .catch(error => next(error))
   )
 
   return router

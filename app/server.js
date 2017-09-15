@@ -3,10 +3,19 @@ const bodyParser = require('body-parser')
 
 const base = require('./routes/base')
 const items = require('./routes/items')
+const cors = require('cors')
+
+// Fake auth to set a user-object on incoming requests until proper session/auth is in place
+function fakeAuth(req, res, next) {
+  req.user = { id: '123123', name: 'John Doe', email: 'john@doe.com' }
+  next()
+}
 
 // Install Express middleware
 function installMiddlware(app) {
   app.use(bodyParser.json())
+  app.use(fakeAuth)
+  app.use(cors({origin: 'http://localhost:8080'}))
 }
 
 // Install the application routers
