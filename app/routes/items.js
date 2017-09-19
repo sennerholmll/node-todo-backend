@@ -11,7 +11,6 @@ const { createTodoItem } = require('../models/todoitem.js')
  */
 function getRequestItem(request) {
   const item = request.body
-
   if (item && request.user) {
     item.user = request.user.id || null
   }
@@ -39,6 +38,14 @@ function createRouter(db) {
       .then(item => req.items.save(item))
       .then(item => res.status(201).json(item))
       .catch(error => next(error))
+  )
+
+  router.delete('/:key', (req, res, next) =>
+    req.items.findOne(req.params.key)
+      .then(item => req.items.delete(item.key))
+      .then(() => res.status(200).send())
+      .catch(error => next(error))
+      .then()
   )
 
   return router
