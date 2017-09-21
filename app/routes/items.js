@@ -45,7 +45,6 @@ function createRouter(db) {
       .then(item => req.items.delete(item.key))
       .then(() => res.status(200).send())
       .catch(error => next(error))
-      .then()
   )
 
   return router
