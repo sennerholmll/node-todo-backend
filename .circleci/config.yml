@@ -1,0 +1,199 @@
+# Javascript Node CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-javascript/ for more details
+#
+
+version: 2
+jobs:
+  build:
+    docker:
+      - image: google/cloud-sdk
+
+    steps:
+      - checkout
+
+      - run: source ./pipeline-scripts.sh; installDockerClient
+
+      - setup_remote_docker
+
+      - run:
+          name: Authenticate to GCP
+          command: source ./pipeline-scripts.sh; gcpAuthenticate ${GOOGLE_AUTH} ${GOOGLE_PROJECT_ID_TEST} ${GOOGLE_COMPUTE_ZONE}
+
+      - run:
+          name: Build application container image
+          command: |
+            imageTag="eu.gcr.io/${GOOGLE_PROJECT_ID_TEST}/${APP_NAME}:${CIRCLE_BUILD_NUM}"
+            gcloud docker -- build --build-arg NPM_TOKEN=${NPM_TOKEN} -t ${imageTag} .
+            gcloud docker -- push ${imageTag}
+
+      - run:
+          name: Build test container image
+          command: |
+            testServerImageTag="eu.gcr.io/${GOOGLE_PROJECT_ID_TEST}/${APP_NAME}-test:${CIRCLE_BUILD_NUM}"
+            docker build --build-arg NPM_TOKEN=${NPM_TOKEN} -t ${testServerImageTag} --file Dockerfile-it .
+            gcloud docker -- push ${testServerImageTag}
+
+      - run:
+          name: k8s parameter substitution
+          command: |
+            imageTag="eu.gcr.io/${GOOGLE_PROJECT_ID_TEST}/${APP_NAME}:${CIRCLE_BUILD_NUM}"
+            sed -i.bak "s#PLACEHOLDER_IMAGE_TAG#${imageTag}#"                               k8s/server.yaml
+            sed -i.bak "s#PLACEHOLDER_VERSION#\"${CIRCLE_BUILD_NUM}\"#"                     k8s/server.yaml
+            sed -i.bak "s#PLACEHOLDER_BUILD_TIMESTAMP#\"`date -u +'%Y-%m-%dT%H:%M:%SZ'`\"#" k8s/server.yaml
+
+      - run: echo ${CIRCLE_BUILD_NUM} > circleci-build-number.txt
+
+      - persist_to_workspace:
+          root: .
+          paths:
+            - k8s
+            - pipeline-scripts.sh
+            - circleci-build-number.txt
+            - test/it/k8s.yaml
+
+  integration_test:
+    docker:
+      - image: google/cloud-sdk
+
+    steps:
+      - attach_workspace:
+          at: .
+
+      - run:
+          name: Authenticate to GCP
+          command: source ./pipeline-scripts.sh; gcpAuthenticate ${GOOGLE_AUTH} ${GOOGLE_PROJECT_ID_TEST} ${GOOGLE_COMPUTE_ZONE}
+
+      - run:
+          name: Authenticate to GKE cluster
+          command: source ./pipeline-scripts.sh; gkeClustersGetCredentials ${GOOGLE_CLUSTER_NAME_TEST}
+
+      - run:
+          name: Deploy application and test pods
+          command: |
+            # Deploy server pod
+            rm -rf k8s-it/*; cp -rf k8s/. k8s-it/
+            sed -i.bak "s#PLACEHOLDER_NODE_ENV#it#" k8s-it/server.yaml
+            kubectl -n ${APP_NAME}-it apply --record=true -f k8s-it/
+            # Deploy test pod
+            cp test/it/k8s.yaml k8s-it/
+            testServerImageTag="eu.gcr.io/${GOOGLE_PROJECT_ID_TEST}/${APP_NAME}-test:`cat circleci-build-number.txt`"
+            sed -i.bak "s#PLACEHOLDER_IMAGE_TAG#${testServerImageTag}#" k8s-it/k8s.yaml
+            sed -i.bak "s#PLACEHOLDER_NODE_ENV#it#"                     k8s-it/k8s.yaml
+            kubectl -n ${APP_NAME}-it apply --record=true -f k8s-it/k8s.yaml
+
+      - run:
+          name: Wait for application pod to be ready to receive API-calls
+          command: |
+            source ./pipeline-scripts.sh
+
+            # Wait for deployed server container to be ready
+            kubectl -n ${APP_NAME}-it rollout status deployment server -w
+
+            # Wait for deployed test container to be ready
+            kubectl -n ${APP_NAME}-it rollout status deployment test -w
+
+      - run:
+          name: Run integration tests
+          command: |
+            source ./pipeline-scripts.sh
+            testPodName=`getPodName ${APP_NAME}-it test`
+            kubectl -n ${APP_NAME}-it exec -it ${testPodName} npm run test:it
+            if [ $? -eq 0 ]; then
+              echo integration test succeeded
+              deleteDeployments ${APP_NAME}-it
+            else
+              echo integration test failed
+              exit 1
+            fi
+
+  deploy_stage:
+    docker:
+      - image: google/cloud-sdk
+
+    steps:
+      - attach_workspace:
+          at: .
+
+      - run:
+          name: Authenticate to GCP
+          command: source ./pipeline-scripts.sh; gcpAuthenticate ${GOOGLE_AUTH} ${GOOGLE_PROJECT_ID_TEST} ${GOOGLE_COMPUTE_ZONE}
+
+      - run:
+          name: Authenticate to GKE cluster
+          command: source ./pipeline-scripts.sh; gkeClustersGetCredentials ${GOOGLE_CLUSTER_NAME_TEST}
+
+      - run:
+          name: k8s variables
+          command: |
+            rm -rf k8s-stage/*; cp -rf k8s/. k8s-stage/
+            sed -i.bak "s#PLACEHOLDER_NODE_ENV#stage#" k8s-stage/server.yaml
+
+      - deploy:
+          name: k8s deploy to stage
+          command: |
+            kubectl -n ${APP_NAME}-stage apply --record=true -f k8s-stage/
+
+      - run:
+          name: Wait for application pod to be ready to receive API-calls
+          command: |
+            source ./pipeline-scripts.sh
+
+            # Wait for deployed server container to be ready
+            kubectl -n ${APP_NAME}-stage rollout status deployment server -w
+
+  deploy_prod:
+    docker:
+      - image: google/cloud-sdk
+
+    steps:
+      - attach_workspace:
+          at: .
+
+      - run:
+          name: Authenticate to GCP
+          command: source ./pipeline-scripts.sh; gcpAuthenticate ${GOOGLE_AUTH} ${GOOGLE_PROJECT_ID_PROD} ${GOOGLE_COMPUTE_ZONE}
+
+      - run:
+          name: Authenticate to GKE cluster
+          command: source ./pipeline-scripts.sh; gkeClustersGetCredentials ${GOOGLE_CLUSTER_NAME_PROD}
+
+      - deploy:
+          name: k8s deploy to prod
+          command: |
+            rm -rf k8s-prod/*; cp -rf k8s/. k8s-prod/
+            sed -i.bak "s#PLACEHOLDER_NODE_ENV#production#" k8s-prod/server.yaml
+            kubectl -n ${APP_NAME}-prod apply --record=true -f k8s-prod/
+
+      - run:
+          name: Wait for application pod to be ready to receive API-calls
+          command: |
+            source ./pipeline-scripts.sh
+
+            # Wait for deployed server container to be ready
+            kubectl -n ${APP_NAME}-prod rollout status deployment server -w
+
+workflows:
+  version: 2
+  build_and_deploy:
+    jobs:
+      - build
+      - integration_test:
+          requires:
+            - build
+      - deploy_stage:
+          requires:
+            - integration_test
+      - approve_prod:
+          type: approval
+          filters:
+            branches:
+              only: master
+          requires:
+              - deploy_stage
+      - deploy_prod:
+          filters:
+            branches:
+              only: master
+          requires:
+            - approve_prod
