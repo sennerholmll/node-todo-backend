@@ -2,10 +2,14 @@
 
 set -e
 
-imagename=${IMAGENAME:-todo}
-version=${GO_PIPELINE_LABEL:-dev}
+directory=`dirname $0`
+source ${directory}/common.sh
 
-repository_prefix=${REPOSITORY_PREFIX}
+
+imagename=${1:-todo}
+version=${2:-dev}
+
+repository_prefix=${3}
 
 # Retag image
 docker tag ${imagename}:${version} ${repository_prefix}/${imagename}:${version}
