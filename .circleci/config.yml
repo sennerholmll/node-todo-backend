@@ -28,7 +28,7 @@ jobs:
 
       - run:
           name: Persist artifacts
-          command: echo scripts/persist-artifact.sh ${CIRCLE_PROJECT_REPONAME} ${CIRCLE_BUILD_NUM} eu.gcr.io/${GOOGLE_PROJECT_ID}
+          command: scripts/persist-artifact.sh ${CIRCLE_PROJECT_REPONAME} ${CIRCLE_BUILD_NUM} eu.gcr.io/${GOOGLE_PROJECT_ID}
 
   fast_test:
     docker:
