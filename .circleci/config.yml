@@ -32,17 +32,15 @@ jobs:
       - image: sennerholm/google-cloud-sdk-terraform
 
     steps:      
-    - run: 
+      - run: 
          name: Checking environment
          command: env
       - run:
           name: Clone Terraform infrastructure
           command: echo clone repo
-
       - run:
           name: Update repo artifact to new version
           command: echo Update ref
-
       - run:
           name: Deploy application and test pods
           command: run Deploy Pod and run test
@@ -94,11 +92,13 @@ workflows:
       - build:
           context: org-global      
       - fast_test:
+          context: org-global      
           requires:
             - build
       - deploy_stage:
+          context: org-global      
           requires:
-            - fast_test
+            - integration_test
       - approve_prod:
           type: approval
           filters:
@@ -107,6 +107,7 @@ workflows:
           requires:
               - deploy_stage
       - deploy_prod:
+          context: org-global            
           filters:
             branches:
               only: master
