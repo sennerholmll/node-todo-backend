@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 
-
 # Install docker client. Addresses the error "Docker not installed". "setup_remote_docker" is not enough
 function installDockerClient() {
-  set -x
-  VER="17.03.1-ce"
+  set -xVER="17.03.1-ce"
   curl -L -o /tmp/docker-$VER.tgz https://get.docker.com/builds/Linux/x86_64/docker-$VER.tgz
   tar -xz -C /tmp -f /tmp/docker-$VER.tgz
   mv /tmp/docker/* /usr/bin
+  
 }
 
 # Authenticate with a service account, set GCP project and compute zone
@@ -22,6 +21,42 @@ function gcpAuthenticate() {
   gcloud --quiet config set compute/zone ${googleComputeZone}
 }
 
+function createTerraformConf()
+{
+  googleAuth=$1
+  project_name=$2
+  tf_creds="${HOME}/gcp-key.json"
+  echo ${googleAuth} | base64 -i --decode > ${tf_creds}
+  cat > terraform-infrastructure-live/gce_account/terraform.tfvars <<EOF
+  // Created by scripts/bootstrap.sh
+terragrunt = {
+  remote_state {
+    backend = "gcs"
+    config {
+      bucket = "${project_name}"
+      project = "${project_name}"
+      path   = "\${path_relative_to_include()}/terraform.tfstate"
+      credentials = "${tf_creds}"
+    }
+  }
+  terraform = {
+    extra_arguments "account_vars" {
+      commands = ["\${get_terraform_commands_that_need_vars()}"]
+
+      required_var_files = [
+        "\${get_parent_tfvars_dir()}/terraform.tfvars"
+
+      ]
+    }
+  }
+}
+google_project = "${project_name}"
+google_keyfile = "${tf_creds}"
+EOF
+
+  
+  
+}
 # Authenticate to a GKE cluster
 function gkeClustersGetCredentials() {
   googleClusterName=$1
