@@ -17,6 +17,8 @@ jobs:
          name: Checking environment
          command: env
 
+      - run: echo "Foo ${FOO} Bar: ${BAR}"
+
       - run: source ./pipeline-scripts.sh; installDockerClient
 
       - setup_remote_docker
