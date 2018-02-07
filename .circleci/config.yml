@@ -18,28 +18,18 @@ jobs:
 
       - run: echo "Foo ${FOO} Bar ${BAR}"
 
-      - run: source ./pipeline-scripts.sh; installDockerClient
+      - run: source ./scripts/common; installDockerClient
 
       - setup_remote_docker
 
-      - run:
-          name: Authenticate to GCP
-          command: source ./pipeline-scripts.sh; gcpAuthenticate ${GOOGLE_AUTH} ${GOOGLE_PROJECT_ID_TEST} ${GOOGLE_COMPUTE_ZONE}
+      - run: 
+          name: Build and verify artifact
+          command: scripts/buildverify-artifact.sh ${CIRCLE_PROJECT_REPONAME} {CIRCLE_BUILD_NUM}
 
       - run:
-          name: Build application container image
-          command: |
-            imageTag="eu.gcr.io/${GOOGLE_PROJECT_ID_TEST}/${APP_NAME}:${CIRCLE_BUILD_NUM}"
-            gcloud docker -- build --build-arg NPM_TOKEN=${NPM_TOKEN} -t ${imageTag} .
-            gcloud docker -- push ${imageTag}
-
-      - run:
-          name: Build test container image
-          command: |
-            testServerImageTag="eu.gcr.io/${GOOGLE_PROJECT_ID_TEST}/${APP_NAME}-test:${CIRCLE_BUILD_NUM}"
-            docker build --build-arg NPM_TOKEN=${NPM_TOKEN} -t ${testServerImageTag} --file Dockerfile-it .
-            gcloud docker -- push ${testServerImageTag}
-
+          name: Persist artifacts
+          command: scripts/buildverify-artifact.sh ${CIRCLE_PROJECT_REPONAME} {CIRCLE_BUILD_NUM} eu.gcr.io/${GOOGLE_PROJECT_ID}
+      - run: /bin/false
       - run:
           name: k8s parameter substitution
           command: |
