@@ -2,8 +2,12 @@
 
 set -e
 
-imagename=${IMAGENAME:-todo}
-version=${GO_PIPELINE_LABEL:-dev}
+directory=`dirname $0`
+source ${directory}/common.sh
+
+
+imagename=${1:-todo}
+version=${2:-dev}
 
 # docker build
 docker build -t ${imagename}:${version} .
