@@ -1,12 +1,12 @@
 const chai = require('chai')
 const expect = chai.expect
 const chaiHttp = require('chai-http')
+const bodyParser = require('body-parser')
 
 chai.use(chaiHttp)
-
 const express = require('express')
 const memstore = require('../app/database/memstore')
-const entries = require('../app/routes/items')
+const items = require('../app/routes/items')
 
 function allowErrorResponse(allowedErrors, promise) {
   return promise.catch(err => {
@@ -29,7 +29,13 @@ describe('Items', () => {
   beforeEach(() => {
     store = memstore.create()
     app = express()
-    app.use(entries.createRouter(store))
+    collection = store.collection('TodoItem')
+    app.use(bodyParser.json())
+    app.use((req, res, next) => {
+      req.user = { id: 'valid' }
+      next()
+    })
+    app.use(items.createRouter(store))
     app.use(applicationErrorHandler)
   })
 
@@ -42,7 +48,6 @@ describe('Items', () => {
   })
 
   it('get / should list all items in database', async () => {
-    const collection = store.collection('TodoItem')
     await collection.save({ title: 'a name' })
     await collection.save({ title: 'another one' })
 
@@ -54,9 +59,27 @@ describe('Items', () => {
     expect(res.body).to.be.eql(result.entities)
   })
 
+  it('should support saving an entry', async () => {
+    const res = await chai.request(app).post('/').send({ title: 'name' })
+    const result = await collection.find()
+    expect(res.body).to.be.eql(result.entities[0])
+  })
+
   it('post / gives 422 on invalid entry', async () => {
     const res = await allowErrorResponse([422], chai.request(app).post('/').send({ name: 'name' }))
     expect(res).to.have.status(422)
     expect(res.text).to.not.be.undefined
+  })
+
+  it('snould support deleting an item', async () => {
+    const res = await chai.request(app).post('/').send({ title: 'item to delete' })
+
+    await chai.request(app).delete(`/${res.body.key}`)
+
+    const result = await collection.find()
+    expect(result.entities).to.be.empty
+  })
+
+  it('should support updating an item', async () => {
   })
 })
