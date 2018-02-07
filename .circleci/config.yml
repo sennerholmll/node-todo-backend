@@ -21,6 +21,10 @@ jobs:
       - run: 
           name: Build and verify artifact
           command: scripts/buildverify-artifact.sh ${CIRCLE_PROJECT_REPONAME} ${CIRCLE_BUILD_NUM}
+      - run:
+          name: Authenticate to GCP
+          command: source ./pipeline-scripts.sh; gcpAuthenticate ${GOOGLE_AUTH} ${GOOGLE_PROJECT_ID} ${GOOGLE_COMPUTE_ZONE}
+
 
       - run:
           name: Persist artifacts
@@ -36,14 +40,16 @@ jobs:
          command: env
       - run:
           name: Clone Terraform infrastructure
-          command: echo clone repo
+          command: echo clone repo from env 
       - run:
           name: Update repo artifact to new version
           command: echo Update ref
       - run:
           name: Deploy application and test pods
-          command: run Deploy Pod and run test
-
+          command: echo run Deploy Pod and run test
+      - run:
+          name: Commit and push new version
+          command: echo run Deploy Pod and run test
   deploy_stage:
     docker:
       - image: sennerholm/google-cloud-sdk-terraform
@@ -62,7 +68,7 @@ jobs:
 
       - run:
           name: Deploy application 
-          command: run terraform to deploy pod
+          command: echo run terraform to deploy pod
 
   deploy_prod:
     docker:
@@ -82,7 +88,7 @@ jobs:
 
       - run:
           name: Deploy application 
-          command: run terraform to deploy pod
+          command: echo run terraform to deploy pod
 
 workflows:
   version: 2
