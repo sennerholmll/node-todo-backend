@@ -23,7 +23,7 @@ jobs:
           command: scripts/buildverify-artifact.sh ${CIRCLE_PROJECT_REPONAME} ${CIRCLE_BUILD_NUM}
       - run:
           name: Authenticate to GCP
-          command: source ./pipeline-scripts.sh; gcpAuthenticate ${GOOGLE_AUTH} ${GOOGLE_PROJECT_ID} ${GOOGLE_COMPUTE_ZONE}
+          command: source scripts/common.sh; gcpAuthenticate ${GOOGLE_AUTH} ${GOOGLE_PROJECT_ID} ${GOOGLE_COMPUTE_ZONE}
 
 
       - run:
