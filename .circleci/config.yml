@@ -98,7 +98,7 @@ workflows:
       - deploy_stage:
           context: org-global      
           requires:
-            - integration_test
+            - fast_test
       - approve_prod:
           type: approval
           filters:
