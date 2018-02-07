@@ -18,7 +18,7 @@ jobs:
 
       - run: echo "Foo ${FOO} Bar ${BAR}"
 
-      - run: source ./scripts/common; installDockerClient
+      - run: source ./scripts/common.sh; installDockerClient
 
       - setup_remote_docker
 
