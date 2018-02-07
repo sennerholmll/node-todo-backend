@@ -12,6 +12,10 @@ jobs:
     steps:
       - checkout
 
+      - run: 
+         name: Checking environment
+         command: env
+
       - run: source ./pipeline-scripts.sh; installDockerClient
 
       - setup_remote_docker
