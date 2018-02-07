@@ -25,8 +25,7 @@ jobs:
       - run:
           name: Persist artifacts
           command: scripts/persist-artifact.sh ${CIRCLE_PROJECT_REPONAME} ${CIRCLE_BUILD_NUM} eu.gcr.io/${GOOGLE_PROJECT_ID}
-            sed -i.bak "s#PLACEHOLDER_VERSION#\"${CIRCLE_BUILD_NUM}\"#"                     k8s/server.yaml
-            - k8s
+
   fast_test:
     docker:
       - image: sennerholm/google-cloud-sdk-terraform
