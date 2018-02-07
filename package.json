@@ -1,7 +1,7 @@
 {
-  "name": "medlogger",
+  "name": "node-todo-backend",
   "version": "1.0.0",
-  "description": "Med log backend",
+  "description": "Node Todo backend",
   "main": "app/main.js",
   "scripts": {
     "start": "node app/main.js",
@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mhallendal/medloggerr"
+    "url": "git+https://github.com/mhallendal/node-todo-backend"
   },
   "author": "Mikael Hallendal <mikael.hallendal@cag.se>",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/cag-group/medlogger/issues"
+    "url": "https://github.com/mhallendal/node-todo-backend/issues"
   },
-  "homepage": "https://github.com/cag-group/medlogger#readme",
+  "homepage": "https://github.com/mhallendal/node-todo-backend#readme",
   "dependencies": {
     "@google-cloud/datastore": "^1.1.0",
     "body-parser": "^1.17.2",
