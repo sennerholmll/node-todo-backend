@@ -7,7 +7,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: google/cloud-sdk
+      - image: sennerholm/google-cloud-sdk-terraform
 
     steps:
       - checkout
@@ -15,10 +15,6 @@ jobs:
       - run: 
          name: Checking environment
          command: env
-
-      - run: echo "Foo ${FOO} Bar ${BAR}"
-
-      - run: source ./scripts/common.sh; installDockerClient
 
       - setup_remote_docker
 
@@ -28,146 +24,68 @@ jobs:
 
       - run:
           name: Persist artifacts
-          command: scripts/buildverify-artifact.sh ${CIRCLE_PROJECT_REPONAME} ${CIRCLE_BUILD_NUM} eu.gcr.io/${GOOGLE_PROJECT_ID}
-      - run: /bin/false
-      - run:
-          name: k8s parameter substitution
-          command: |
-            imageTag="eu.gcr.io/${GOOGLE_PROJECT_ID_TEST}/${APP_NAME}:${CIRCLE_BUILD_NUM}"
-            sed -i.bak "s#PLACEHOLDER_IMAGE_TAG#${imageTag}#"                               k8s/server.yaml
+          command: scripts/persist-artifact.sh ${CIRCLE_PROJECT_REPONAME} ${CIRCLE_BUILD_NUM} eu.gcr.io/${GOOGLE_PROJECT_ID}
             sed -i.bak "s#PLACEHOLDER_VERSION#\"${CIRCLE_BUILD_NUM}\"#"                     k8s/server.yaml
-            sed -i.bak "s#PLACEHOLDER_BUILD_TIMESTAMP#\"`date -u +'%Y-%m-%dT%H:%M:%SZ'`\"#" k8s/server.yaml
-
-      - run: echo ${CIRCLE_BUILD_NUM} > circleci-build-number.txt
-
-      - persist_to_workspace:
-          root: .
-          paths:
             - k8s
-            - pipeline-scripts.sh
-            - circleci-build-number.txt
-            - test/it/k8s.yaml
-
-  integration_test:
+  fast_test:
     docker:
-      - image: google/cloud-sdk
+      - image: sennerholm/google-cloud-sdk-terraform
 
-    steps:
-      - attach_workspace:
-          at: .
+    steps:      
+    - run: 
+         name: Checking environment
+         command: env
+      - run:
+          name: Clone Terraform infrastructure
+          command: echo clone repo
 
       - run:
-          name: Authenticate to GCP
-          command: source ./pipeline-scripts.sh; gcpAuthenticate ${GOOGLE_AUTH} ${GOOGLE_PROJECT_ID_TEST} ${GOOGLE_COMPUTE_ZONE}
-
-      - run:
-          name: Authenticate to GKE cluster
-          command: source ./pipeline-scripts.sh; gkeClustersGetCredentials ${GOOGLE_CLUSTER_NAME_TEST}
+          name: Update repo artifact to new version
+          command: echo Update ref
 
       - run:
           name: Deploy application and test pods
-          command: |
-            # Deploy server pod
-            rm -rf k8s-it/*; cp -rf k8s/. k8s-it/
-            sed -i.bak "s#PLACEHOLDER_NODE_ENV#it#" k8s-it/server.yaml
-            kubectl -n ${APP_NAME}-it apply --record=true -f k8s-it/
-            # Deploy test pod
-            cp test/it/k8s.yaml k8s-it/
-            testServerImageTag="eu.gcr.io/${GOOGLE_PROJECT_ID_TEST}/${APP_NAME}-test:`cat circleci-build-number.txt`"
-            sed -i.bak "s#PLACEHOLDER_IMAGE_TAG#${testServerImageTag}#" k8s-it/k8s.yaml
-            sed -i.bak "s#PLACEHOLDER_NODE_ENV#it#"                     k8s-it/k8s.yaml
-            kubectl -n ${APP_NAME}-it apply --record=true -f k8s-it/k8s.yaml
-
-      - run:
-          name: Wait for application pod to be ready to receive API-calls
-          command: |
-            source ./pipeline-scripts.sh
-
-            # Wait for deployed server container to be ready
-            kubectl -n ${APP_NAME}-it rollout status deployment server -w
-
-            # Wait for deployed test container to be ready
-            kubectl -n ${APP_NAME}-it rollout status deployment test -w
-
-      - run:
-          name: Run integration tests
-          command: |
-            source ./pipeline-scripts.sh
-            testPodName=`getPodName ${APP_NAME}-it test`
-            kubectl -n ${APP_NAME}-it exec -it ${testPodName} npm run test:it
-            if [ $? -eq 0 ]; then
-              echo integration test succeeded
-              deleteDeployments ${APP_NAME}-it
-            else
-              echo integration test failed
-              exit 1
-            fi
+          command: run Deploy Pod and run test
 
   deploy_stage:
     docker:
-      - image: google/cloud-sdk
+      - image: sennerholm/google-cloud-sdk-terraform
 
     steps:
-      - attach_workspace:
-          at: .
+    - run: 
+         name: Checking environment
+         command: env
+      - run:
+          name: Clone Terraform infrastructure
+          command: echo clone repo
 
       - run:
-          name: Authenticate to GCP
-          command: source ./pipeline-scripts.sh; gcpAuthenticate ${GOOGLE_AUTH} ${GOOGLE_PROJECT_ID_TEST} ${GOOGLE_COMPUTE_ZONE}
+          name: Update repo artifact to new version
+          command: echo Update ref
 
       - run:
-          name: Authenticate to GKE cluster
-          command: source ./pipeline-scripts.sh; gkeClustersGetCredentials ${GOOGLE_CLUSTER_NAME_TEST}
-
-      - run:
-          name: k8s variables
-          command: |
-            rm -rf k8s-stage/*; cp -rf k8s/. k8s-stage/
-            sed -i.bak "s#PLACEHOLDER_NODE_ENV#stage#" k8s-stage/server.yaml
-
-      - deploy:
-          name: k8s deploy to stage
-          command: |
-            kubectl -n ${APP_NAME}-stage apply --record=true -f k8s-stage/
-
-      - run:
-          name: Wait for application pod to be ready to receive API-calls
-          command: |
-            source ./pipeline-scripts.sh
-
-            # Wait for deployed server container to be ready
-            kubectl -n ${APP_NAME}-stage rollout status deployment server -w
+          name: Deploy application 
+          command: run terraform to deploy pod
 
   deploy_prod:
     docker:
-      - image: google/cloud-sdk
+      - image: sennerholm/google-cloud-sdk-terraform
 
     steps:
-      - attach_workspace:
-          at: .
+    - run: 
+         name: Checking environment
+         command: env
+      - run:
+          name: Clone Terraform infrastructure
+          command: echo clone repo
 
       - run:
-          name: Authenticate to GCP
-          command: source ./pipeline-scripts.sh; gcpAuthenticate ${GOOGLE_AUTH} ${GOOGLE_PROJECT_ID_PROD} ${GOOGLE_COMPUTE_ZONE}
+          name: Update repo artifact to new version
+          command: echo Update ref
 
       - run:
-          name: Authenticate to GKE cluster
-          command: source ./pipeline-scripts.sh; gkeClustersGetCredentials ${GOOGLE_CLUSTER_NAME_PROD}
-
-      - deploy:
-          name: k8s deploy to prod
-          command: |
-            rm -rf k8s-prod/*; cp -rf k8s/. k8s-prod/
-            sed -i.bak "s#PLACEHOLDER_NODE_ENV#production#" k8s-prod/server.yaml
-            kubectl -n ${APP_NAME}-prod apply --record=true -f k8s-prod/
-
-      - run:
-          name: Wait for application pod to be ready to receive API-calls
-          command: |
-            source ./pipeline-scripts.sh
-
-            # Wait for deployed server container to be ready
-            kubectl -n ${APP_NAME}-prod rollout status deployment server -w
+          name: Deploy application 
+          command: run terraform to deploy pod
 
 workflows:
   version: 2
@@ -175,12 +93,12 @@ workflows:
     jobs:
       - build:
           context: org-global      
-      - integration_test:
+      - fast_test:
           requires:
             - build
       - deploy_stage:
           requires:
-            - integration_test
+            - fast_test
       - approve_prod:
           type: approval
           filters:
