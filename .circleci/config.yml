@@ -50,9 +50,9 @@ jobs:
       - image: sennerholm/google-cloud-sdk-terraform
 
     steps:
-    - run: 
-         name: Checking environment
-         command: env
+      - run: 
+          name: Checking environment
+          command: env
       - run:
           name: Clone Terraform infrastructure
           command: echo clone repo
