@@ -6,7 +6,6 @@
 version: 2
 jobs:
   build:
-    context: org-global
     docker:
       - image: google/cloud-sdk
 
@@ -185,6 +184,7 @@ workflows:
   build_and_deploy:
     jobs:
       - build
+          context: org-global      
       - integration_test:
           requires:
             - build
