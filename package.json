@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node app/main.js",
     "test": "mocha test/*.js",
-    "system-test:fast": "mocha system-test/fast/*",
+    "system-test:fast": "mocha --timeout 15000 system-test/fast/*",
     "autotest": "supervisor -q -n exit mocha database/test/*.js"
   },
   "repository": {
