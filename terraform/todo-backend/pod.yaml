@@ -1,0 +1,12 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: todo-backend
+spec:
+  restartPolicy: Never
+  containers:
+    - name: test
+      image: eu.gcr.io/mikan-terraform-project181/node-todo-backend:27
+      command: ["./runtest"]
+      args: ["--fast"]
