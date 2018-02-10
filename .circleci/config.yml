@@ -29,27 +29,40 @@ jobs:
       - run:
           name: Persist artifacts
           command: scripts/persist-artifact.sh ${CIRCLE_PROJECT_REPONAME} ${CIRCLE_BUILD_NUM} eu.gcr.io/${GOOGLE_PROJECT_ID}
+      - run: echo ${CIRCLE_BUILD_NUM} > circleci-build-number.txt
+
+      - persist_to_workspace:
+          root: .
+          paths:
+            - scripts
+            - circleci-build-number.txt
+            
 
   fast_test:
     docker:
       - image: sennerholm/google-cloud-sdk-terraform
 
-    steps:      
+    steps:   
+      - attach_workspace:
+        at: .
+     
       - run: 
          name: Checking environment
          command: env
+      - run: 
+         name: Checking dirs
+         command: ls -l . scripts
       - run:
-          name: Clone Terraform infrastructure
-          command: echo clone repo from env 
-      - run:
-          name: Update repo artifact to new version
-          command: echo Update ref
+          name: Clone and update Terraform infrastructure repo
+          command: bash -x scripts/clone-and-update-infrastructure.sh ${CIRCLE_SHA1} `cat circleci-build-number.txt` 
+          
       - run:
           name: Deploy application and test pods
-          command: echo run Deploy Pod and run test
-      - run:
-          name: Commit and push new version
-          command: echo run Deploy Pod and run test
+          command: |
+            cd terraform-infrastructure-live/gce_account/europe-west1/fast/todo-backend-fast
+            terragrunt apply -auto-approve
+            kubectl  --namespace=test-todo-backend logs -f po/todo-backend-`cat circleci-build-number.txt`
+  
   deploy_stage:
     docker:
       - image: sennerholm/google-cloud-sdk-terraform
