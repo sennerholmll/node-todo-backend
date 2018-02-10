@@ -66,7 +66,7 @@ resource "kubernetes_pod" "test" {
 
   }
   provisioner "local-exec" { // To ensure that we can connect with kubectl outside terraform directly afterwards
-    gcloud --project ${var.google_project} container clusters get-credentials ${data.terraform_remote_state.gke.name}; 
+    command = "gcloud --project ${var.google_project} container clusters get-credentials ${data.terraform_remote_state.gke.name}"
   }
 }
   
