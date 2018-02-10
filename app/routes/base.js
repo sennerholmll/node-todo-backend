@@ -4,7 +4,7 @@ function createRouter() {
   const router = new express.Router()
 
   router.route('/').get((req, res) => {
-    res.send('Welcome to the Medlogger backend')
+    res.send('Welcome to the Node Todo backend')
   })
 
   return router
