@@ -68,10 +68,11 @@ jobs:
       - run:
           name: Deploy application and test pods
           command: |
+            version=`cat circleci-build-number.txt`
             cd terraform-infrastructure-live/gce_account/europe-west1/fast/todo-backend-fast
             terragrunt apply -auto-approve
-            kubectl  --namespace=fast-todo-backend logs -f po/todo-backend-`cat ~/circleci-build-number.txt`
-            if ! kubectl  --namespace=fast-todo-backend get po/todo-backend-51 | grep Completed >/dev/null; then echo failed; exit 1; fi
+            kubectl  --namespace=fast-todo-backend logs -f po/todo-backend-${version}
+            if ! kubectl  --namespace=fast-todo-backend get po/todo-backend-${version} | grep Completed >/dev/null; then echo failed; exit 1; fi
   
   deploy_stage:
     docker:
