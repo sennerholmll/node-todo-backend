@@ -73,7 +73,42 @@ jobs:
             terragrunt apply -auto-approve
             kubectl  --namespace=fast-todo-backend logs -f po/todo-backend-${version}
             if ! kubectl  --namespace=fast-todo-backend get po/todo-backend-${version} | grep Completed >/dev/null; then echo failed; exit 1; fi
-  
+  medium_test1:
+    docker:
+      - image: sennerholm/google-cloud-sdk-terraform
+
+    steps:   
+      - attach_workspace:
+          at: .
+
+      - run:
+          name: Authenticate to GCP
+          command: source scripts/common.sh; gcpAuthenticate ${GOOGLE_AUTH} ${GOOGLE_PROJECT_ID} ${GOOGLE_COMPUTE_ZONE}
+     
+      - run: 
+         name: Checking environment
+         command: env
+      - run: 
+         name: Checking dirs
+         command: ls -l . scripts
+      - run:
+          name: Clone and update Terraform infrastructure repo
+          command: bash -x scripts/clone-and-update-infrastructure.sh ${CIRCLE_SHA1} `cat circleci-build-number.txt` terraform-infrastructure-live/gce_account/europe-west1/medium/todo-backend-medium1
+      - run:
+          name: Create terraform config
+          command: source scripts/common.sh; createTerraformConf ${GOOGLE_AUTH} ${GOOGLE_PROJECT_ID} 
+          
+      - run:
+          name: Deploy application and test pods from scratch
+          command: |
+            version=`cat circleci-build-number.txt`
+            cd terraform-infrastructure-live/gce_account/europe-west1//medium/todo-backend-medium1
+            terragrunt destroy -force
+            terragrunt apply -auto-approve
+            kubectl  --namespace=medium-todo-backend1 logs -f po/todo-backend-${version}
+            if ! kubectl  --namespace=medium-todo-backend1 get po/todo-backend-${version} | grep Completed >/dev/null; then echo failed; retvalue=1; else retvalue=0; fi
+            terragrunt destroy -force
+            exit $retvalue
   deploy_stage:
     docker:
       - image: sennerholm/google-cloud-sdk-terraform
@@ -124,6 +159,10 @@ workflows:
           context: org-global      
           requires:
             - build
+      - medium_test1:
+          context: org-global      
+          requires:
+            - fast_test
       - deploy_stage:
           context: org-global      
           requires:
@@ -135,6 +174,7 @@ workflows:
               only: master
           requires:
               - deploy_stage
+              - medium_test1
       - deploy_prod:
           context: org-global            
           filters:
