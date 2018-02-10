@@ -10,7 +10,11 @@ version=${2:-latest}
 path=${3:-terraform-infrastructure-live/gce_account/europe-west1/fast/todo-backend-fast}
 infrarepo=${4:-git@github.com:sennerholm/terraform-infrastructure-live.git}
 
-
+# Add github ssh key
+if [ ! -d ~/.ssh ]; then
+    mkdir ~/.ssh
+fi
+ssh-keyscan github.com >>~/.ssh/known_hosts
 git clone ${infrarepo}
 cd ${path}
 echo version = ${version} > version.tfvars
