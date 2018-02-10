@@ -65,6 +65,9 @@ resource "kubernetes_pod" "test" {
     volume = [ { name="google-service-account" secret={secret_name="google-service-account"}} ]
 
   }
+  provisioner "local-exec" { // To ensure that we can connect with kubectl outside terraform directly afterwards
+    gcloud --project ${var.google_project} container clusters get-credentials ${data.terraform_remote_state.gke.name}; 
+  }
 }
   
 // Create deployment, service in mode==deployment
