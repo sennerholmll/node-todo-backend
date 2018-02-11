@@ -69,11 +69,11 @@ jobs:
           name: Deploy application and test pods
           command: |
             version=`cat circleci-build-number.txt`
-            cd terraform-infrastructure-live/gce_account/europe-west1/fast/todo-backend-fast
+            cd terraform-infrastructure-live/gce_account/europe-west1/fast/todo-backend
             terragrunt apply -auto-approve
             kubectl  --namespace=fast-todo-backend logs -f po/todo-backend-${version}
             if ! kubectl  --namespace=fast-todo-backend get po/todo-backend-${version} | grep Completed >/dev/null; then echo failed; exit 1; fi
-  medium_test1:
+  slow_test1:
     docker:
       - image: sennerholm/google-cloud-sdk-terraform
 
@@ -93,7 +93,7 @@ jobs:
          command: ls -l . scripts
       - run:
           name: Clone and update Terraform infrastructure repo
-          command: bash -x scripts/clone-and-update-infrastructure.sh ${CIRCLE_SHA1} `cat circleci-build-number.txt` terraform-infrastructure-live/gce_account/europe-west1/medium/todo-backend-medium1
+          command: bash -x scripts/clone-and-update-infrastructure.sh ${CIRCLE_SHA1} `cat circleci-build-number.txt` terraform-infrastructure-live/gce_account/europe-west1/slow/todo-backend-1
       - run:
           name: Create terraform config
           command: source scripts/common.sh; createTerraformConf ${GOOGLE_AUTH} ${GOOGLE_PROJECT_ID} 
@@ -102,52 +102,81 @@ jobs:
           name: Deploy application and test pods from scratch
           command: |
             version=`cat circleci-build-number.txt`
-            cd terraform-infrastructure-live/gce_account/europe-west1//medium/todo-backend-medium1
+            cd terraform-infrastructure-live/gce_account/europe-west1//slow/todo-backend-1
             terragrunt destroy -force
             terragrunt apply -auto-approve
-            kubectl  --namespace=medium-todo-backend1 logs -f po/todo-backend-${version}
-            if ! kubectl  --namespace=medium-todo-backend1 get po/todo-backend-${version} | grep Completed >/dev/null; then echo failed; retvalue=1; else retvalue=0; fi
+            kubectl  --namespace=slow-todo-backend1 logs -f po/todo-backend-${version}
+            if ! kubectl  --namespace=slow-todo-backend1 get po/todo-backend-${version} | grep Completed >/dev/null; then echo failed; retvalue=1; else retvalue=0; fi
             terragrunt destroy -force
             exit $retvalue
   deploy_stage:
     docker:
       - image: sennerholm/google-cloud-sdk-terraform
 
-    steps:
+    steps:   
+      - attach_workspace:
+          at: .
+
+      - run:
+          name: Authenticate to GCP
+          command: source scripts/common.sh; gcpAuthenticate ${GOOGLE_AUTH} ${GOOGLE_PROJECT_ID} ${GOOGLE_COMPUTE_ZONE}
+     
       - run: 
-          name: Checking environment
-          command: env
+         name: Checking environment
+         command: env
+      - run: 
+         name: Checking dirs
+         command: ls -l . scripts
       - run:
-          name: Clone Terraform infrastructure
-          command: echo clone repo
-
+          name: Clone and update Terraform infrastructure repo
+          command: bash -x scripts/clone-and-update-infrastructure.sh ${CIRCLE_SHA1} `cat circleci-build-number.txt` terraform-infrastructure-live/gce_account/europe-west1/stage/todo-backend
       - run:
-          name: Update repo artifact to new version
-          command: echo Update ref
-
+          name: Create terraform config
+          command: source scripts/common.sh; createTerraformConf ${GOOGLE_AUTH} ${GOOGLE_PROJECT_ID} 
+          
       - run:
-          name: Deploy application 
-          command: echo run terraform to deploy pod
+          name: Deploy application and test pods from scratch
+          command: |
+            version=`cat circleci-build-number.txt`
+            cd terraform-infrastructure-live/gce_account/europe-west1/stage/todo-backend
+            terragrunt apply -auto-approve
+            echo "Run your tests at"
+            terragrunt  output url 2>/dev/null
 
-  deploy_prod:
+   
+  deploy_production:
     docker:
       - image: sennerholm/google-cloud-sdk-terraform
 
-    steps:
+    steps:   
+      - attach_workspace:
+          at: .
+
+      - run:
+          name: Authenticate to GCP
+          command: source scripts/common.sh; gcpAuthenticate ${GOOGLE_AUTH} ${GOOGLE_PROJECT_ID} ${GOOGLE_COMPUTE_ZONE}
+     
       - run: 
-          name: Checking environment
-          command: env
+         name: Checking environment
+         command: env
+      - run: 
+         name: Checking dirs
+         command: ls -l . scripts
       - run:
-          name: Clone Terraform infrastructure
-          command: echo clone repo
-
+          name: Clone and update Terraform infrastructure repo
+          command: bash -x scripts/clone-and-update-infrastructure.sh ${CIRCLE_SHA1} `cat circleci-build-number.txt` terraform-infrastructure-live/gce_account/europe-west1/production/todo-backend
       - run:
-          name: Update repo artifact to new version
-          command: echo Update ref
-
+          name: Create terraform config
+          command: source scripts/common.sh; createTerraformConf ${GOOGLE_AUTH} ${GOOGLE_PROJECT_ID} 
+          
       - run:
-          name: Deploy application 
-          command: echo run terraform to deploy pod
+          name: Deploy application and test pods from scratch
+          command: |
+            version=`cat circleci-build-number.txt`
+            cd terraform-infrastructure-live/gce_account/europe-west1/production/todo-backend
+            terragrunt apply -auto-approve
+            echo "The service is aviable at"
+            terragrunt  output url 2>/dev/null
 
 workflows:
   version: 2
@@ -159,7 +188,7 @@ workflows:
           context: org-global      
           requires:
             - build
-      - medium_test1:
+      - slow_test1:
           context: org-global      
           requires:
             - fast_test
@@ -174,7 +203,7 @@ workflows:
               only: master
           requires:
               - deploy_stage
-              - medium_test1
+              - slow_test1
       - deploy_prod:
           context: org-global            
           filters:
