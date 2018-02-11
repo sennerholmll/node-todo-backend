@@ -196,7 +196,7 @@ workflows:
           context: org-global      
           requires:
             - fast_test
-      - approve_prod:
+      - approve_production:
           type: approval
           filters:
             branches:
@@ -204,10 +204,10 @@ workflows:
           requires:
               - deploy_stage
               - slow_test1
-      - deploy_prod:
+      - deploy_production:
           context: org-global            
           filters:
             branches:
               only: master
           requires:
-            - approve_prod
+            - approve_production
