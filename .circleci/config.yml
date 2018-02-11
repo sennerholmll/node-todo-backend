@@ -60,7 +60,7 @@ jobs:
          command: ls -l . scripts
       - run:
           name: Clone and update Terraform infrastructure repo
-          command: bash -x scripts/clone-and-update-infrastructure.sh ${CIRCLE_SHA1} `cat circleci-build-number.txt` 
+          command: bash -x scripts/clone-and-update-infrastructure.sh ${CIRCLE_SHA1} `cat circleci-build-number.txt` terraform-infrastructure-live/gce_account/europe-west1/fast/todo-backend
       - run:
           name: Create terraform config
           command: source scripts/common.sh; createTerraformConf ${GOOGLE_AUTH} ${GOOGLE_PROJECT_ID} 
