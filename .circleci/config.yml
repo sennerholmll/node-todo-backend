@@ -45,9 +45,7 @@ jobs:
     steps:   
       - attach_workspace:
           at: .
-      - add_ssh_keys:
-          fingerprints:
-            - "7f:ff:b7:ca:b6:0c:68:e3:de:89:db:c5:39:32:c9:6a"
+
       - run:
           name: Authenticate to GCP
           command: source scripts/common.sh; gcpAuthenticate ${GOOGLE_AUTH} ${GOOGLE_PROJECT_ID} ${GOOGLE_COMPUTE_ZONE}
