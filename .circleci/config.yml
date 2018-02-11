@@ -135,7 +135,7 @@ jobs:
           command: source scripts/common.sh; createTerraformConf ${GOOGLE_AUTH} ${GOOGLE_PROJECT_ID} 
           
       - run:
-          name: Deploy application and test pods from scratch
+          name: Deploy application for manual tests
           command: |
             version=`cat circleci-build-number.txt`
             cd terraform-infrastructure-live/gce_account/europe-west1/stage/todo-backend
@@ -170,7 +170,7 @@ jobs:
           command: source scripts/common.sh; createTerraformConf ${GOOGLE_AUTH} ${GOOGLE_PROJECT_ID} 
           
       - run:
-          name: Deploy application and test pods from scratch
+          name: Deploy application 
           command: |
             version=`cat circleci-build-number.txt`
             cd terraform-infrastructure-live/gce_account/europe-west1/production/todo-backend
