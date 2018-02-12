@@ -21,7 +21,6 @@ cd ${path}
 echo version = ${version} > version.tfvars
 sed -i s/?ref=.*\"/?ref=${gitref}\"/ terraform.tfvars
 sed -i s/github.com\\/[^\\/]*\\//github.com\\/${githubaccount}\\// terraform.tfvars
-git diff -u
 git config --global user.email "mikael+circleci@sennerholm.net"
 git config --global user.name "Circle CI"
 git commit -m"Automated Updated ${path} to image version ${version} and gitref ${gitref}" -a
