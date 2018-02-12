@@ -56,7 +56,7 @@ resource "kubernetes_pod" "test" {
       command = ["./runtest"]
       args = [["--fast"]]
       env = [ { name="NODE_ENV" value="${var.environment}"},
-              { name="GOOGLE_DATASTORE_NAMESPACE" value="${kubernetes_namespace.todo_backend.metadata.0.name}"},
+              { name="GOOGLE_DATASTORE_NAMESPACE" value="${kubernetes_namespace.todo_backend.metadata.0.name}-${var.version}"},
               { name="GOOGLE_PROJECT_ID" value="${var.google_project}"},
               { name="GOOGLE_APPLICATION_CREDENTIALS" value="/var/run/secrets/cloud.google.com/service-account.json"}
             ]
