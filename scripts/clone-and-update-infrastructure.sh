@@ -2,6 +2,11 @@
 
 set -e
 
+if [ ${SHLVL} -gt 10 ]; then
+    echo "To many tries"
+    exit 1
+fi
+
 directory=`dirname $0`
 source ${directory}/common.sh
 
@@ -24,6 +29,6 @@ sed -i s/github.com\\/[^\\/]*\\//github.com\\/${githubaccount}\\// terraform.tfv
 git config --global user.email "mikael+circleci@sennerholm.net"
 git config --global user.name "Circle CI"
 git commit -m"Automated Updated ${path} to image version ${version} and gitref ${gitref}" -a
-git push
+git push || (rm -rf terraform-infrastructure-live; $0 "$@")
 
 
