@@ -34,7 +34,7 @@ resource "google_project_iam_member" "datastore_user" {
    role    = "roles/datastore.user"
    member  = "serviceAccount:${google_service_account.todo_account.email}"
    provisioner "local-exec" {
-       command = "echo sleep 60s to propagate all permissions; sleep 60"
+       command = "echo sleep 90s to propagate all permissions; sleep 90"
   }
 }
 
