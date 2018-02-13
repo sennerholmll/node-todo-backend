@@ -8,10 +8,10 @@ const entityName = 'Entry'
 
 // System tests against a real Google Cloud Datastore
 describe('Datastore behaves like a Store', () => {
-  beforeEach(function() {
+  beforeEach(async function() {
     const config = datastore.getConfig(path.join(__dirname, '..', '..', 'config/datastore.json'),
                                        process.env)
-    this.store = datastore.create(config)
+    this.store = await datastore.create(config)
   })
 
   shouldBehaveLikeAStore(entityName)
