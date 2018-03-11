@@ -70,7 +70,8 @@ jobs:
             cd terraform-infrastructure-live/gce_account/europe-west1/fast/todo-backend
             terragrunt apply -auto-approve
             kubectl  --namespace=fast-todo-backend logs -f po/todo-backend-${version}
-            if ! kubectl  --namespace=fast-todo-backend get po/todo-backend-${version} | grep Completed >/dev/null; then echo failed; exit 1; fi
+            if ! kubectl  --namespace=fast-todo-backend get po/todo-backend-${version} | grep Completed >/dev/null; then echo failed; retvalue=1; else retvalue=0; fi
+            exit $retvalue
   slow_test1:
     docker:
       - image: sennerholm/google-cloud-sdk-terraform
