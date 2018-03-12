@@ -73,6 +73,42 @@ jobs:
             if ! kubectl  --namespace=fast-todo-backend get po/todo-backend-${version} | grep Completed >/dev/null; then echo failed; retvalue=1; else retvalue=0; fi
             exit $retvalue
 
+  slow_test1:
+    docker:
+      - image: sennerholm/google-cloud-sdk-terraform
+
+    steps:   
+      - attach_workspace:
+          at: .
+
+      - run:
+          name: Authenticate to GCP
+          command: source scripts/common.sh; gcpAuthenticate ${GOOGLE_AUTH} ${GOOGLE_PROJECT_ID} ${GOOGLE_COMPUTE_ZONE}
+     
+      - run: 
+         name: Checking environment
+         command: env
+      - run: 
+         name: Checking dirs
+         command: ls -l . scripts
+      - run:
+          name: Clone and update Terraform infrastructure repo
+          command: bash -x scripts/clone-and-update-infrastructure.sh ${CIRCLE_SHA1} `cat circleci-build-number.txt` terraform-infrastructure-live/gce_account/europe-west1/slow/todo-backend-1
+      - run:
+          name: Create terraform config
+          command: source scripts/common.sh; createTerraformConf ${GOOGLE_AUTH} ${GOOGLE_PROJECT_ID} 
+          
+      - run:
+          name: Deploy application and test pods
+          command: |
+            version=`cat circleci-build-number.txt`
+            cd terraform-infrastructure-live/gce_account/europe-west1/slow/todo-backend-1
+            terragrunt apply -auto-approve
+            kubectl  --namespace=slow-todo-backend1 logs -f po/todo-backend-${version}
+            if ! kubectl  --namespace=slow-todo-backend1 get po/todo-backend-${version} | grep Completed >/dev/null; then echo failed; retvalue=1; else retvalue=0; fi
+            terragrunt destroy -force
+            exit $retvalue
+
 workflows:
   version: 2
   build_and_deploy:
@@ -83,4 +119,7 @@ workflows:
           context: org-global      
           requires:
             - build
-
+      - slow_test1:
+          context: org-global      
+          requires:
+            - fast_test
